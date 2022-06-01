@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +32,6 @@ namespace WeatherAPI.Handlers
         /// </summary>
         public async Task<List<WeatherInfoResponse>> GetAllWeatherInfo()
         {
-            Log.Information($"Excecution started for method- GetWeatherInfo()");
-
             //list to store all the final weather info list
             List<WeatherInfoResponse> finallist = new List<WeatherInfoResponse>();
 
@@ -50,7 +47,6 @@ namespace WeatherAPI.Handlers
                 foreach (var item in citydata)
                 {
                     var url = $"{Weatherapi_BaseURL}?id={item.Id}&appid={Weatherapi_AppId}&units=metric";
-                    Log.Information($"Calling weather info service api: {url})");
                     var request = new RestRequest(url, Method.Get);
                     var response = await new RestClient().ExecuteAsync(request);
                     if(response.StatusCode == HttpStatusCode.OK)
@@ -73,7 +69,6 @@ namespace WeatherAPI.Handlers
                         }
                         else
                         {
-                            Log.Error($"Weather Service did not return OK when calling {url}. StatusCode returned was {response.StatusCode} and content {response.Content.ToString()}");
                             throw new Exception($"Weather Service did not return OK when calling {url}. StatusCode returned was {response.StatusCode} and content {response.Content.ToString()}");
                         }
                     }
@@ -84,7 +79,6 @@ namespace WeatherAPI.Handlers
 
             catch (Exception ex)
             {
-                Log.Error($"Exception occured : {ex.Message}");
                 throw new Exception(ex.Message);
             }
 
@@ -97,8 +91,6 @@ namespace WeatherAPI.Handlers
         /// </summary>
         public async Task<WeatherInfoResponse> GetWeatherInfoByID(int ID)
         {
-            Log.Information($"Excecution started for method- GetWeatherInfoByID({ID})");
-
             try
             {
                 //Get configurations from appsettings
@@ -110,7 +102,6 @@ namespace WeatherAPI.Handlers
 
 
                 var url = $"{Weatherapi_BaseURL}?id={ID}&appid={Weatherapi_AppId}&units=metric";
-                Log.Information($"Calling weather info service api : {url})");
                 var request = new RestRequest(url, Method.Get);
                 var response = await new RestClient().ExecuteAsync(request);
                 switch (response.StatusCode)
@@ -129,14 +120,13 @@ namespace WeatherAPI.Handlers
                             info.logitude = Obj.list[0].coord.lon;
                             info.temprature = Obj.list[0].main.temp;
 
-                            Log.Information($"Weather serivice api executed sucessfully! : {url})");
+
                             return info;
                         }
 
-                        Log.Information($"Weather serivice api executed sucessfully! -  No Data Found)");
+
                         return null;
                     default:
-                        Log.Error($"Weather Service did not return OK when calling {url}. StatusCode returned was {response.StatusCode} and content {response.Content.ToString()}");
                         throw new Exception($"Weather Service did not return OK when calling {url}. StatusCode returned was {response.StatusCode} and content {response.Content.ToString()}");
                 }
 
@@ -144,7 +134,6 @@ namespace WeatherAPI.Handlers
 
             catch (Exception ex)
             {
-                Log.Error($"Exception occured : {ex.Message}");
                 throw new Exception(ex.Message);
             }
 

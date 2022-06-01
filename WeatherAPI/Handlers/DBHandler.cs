@@ -1,5 +1,6 @@
 ﻿using LiteDB;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,12 +11,15 @@ using WeatherAPI.Models;
 namespace WeatherAPI.Handlers
 {
     /// <summary>
-    /// Helper class to information from Database
+    /// Handler class to information from Database
     /// </summary>
     public class DBHandler : IDBHandler
     {
         private  readonly IConfiguration _config;
 
+        /// <summary>
+        /// Constructor for DB Helper
+        /// </summary>
         public DBHandler(IConfiguration configuration)
         {
             _config = configuration;
@@ -27,14 +31,31 @@ namespace WeatherAPI.Handlers
         /// </summary>        
         public City GetCityByID(int id)
         {
-            String Dbpath = Path.GetDirectoryName(System.IO.Directory.GetCurrentDirectory()) + _config["AppSettings:DbPath"];
-
-            using (var db = new LiteDatabase(Dbpath))
+            Log.Information($"Database Info : Execution started for method GetCityByID{id}");
+            try 
             {
-                var col = db.GetCollection<City>("cities");
-                var result = col.FindById(id);
-                return result;
+                String Dbpath = Path.GetDirectoryName(System.IO.Directory.GetCurrentDirectory()) + _config["AppSettings:DbPath"];
+
+                using (var db = new LiteDatabase(Dbpath))
+                {
+                    var col = db.GetCollection<City>("cities");
+                    var result = col.FindById(id);
+                    if(result == null)
+                    {
+                        Log.Information($"Database Info : No record found  in database !");
+                        return result;
+                    }
+
+                    Log.Information($"Database Info : Execution completed for method GetCityByID{id}");
+                    return result;
+                }
+             }
+            catch(Exception ex)
+            {
+                Log.Error($"Database Exception occured : {ex.Message}");
+                throw new Exception(ex.Message);
             }
+            
         }
 
         /// <summary>
@@ -42,14 +63,32 @@ namespace WeatherAPI.Handlers
         /// </summary>         
         public  IEnumerable<City> GetAll()
         {
-            String Dbpath = Path.GetDirectoryName(System.IO.Directory.GetCurrentDirectory())+_config["AppSettings:DbPath"];
+            Log.Information($"Database Info : Execution started for method GetAll()");
 
-            using (var db = new LiteDatabase(Dbpath))
+            try
             {
-                var col = db.GetCollection<City>("cities");
-                var result = col.FindAll().ToList();
-                return result;
+                String Dbpath = Path.GetDirectoryName(System.IO.Directory.GetCurrentDirectory()) + _config["AppSettings:DbPath"];
+
+                using (var db = new LiteDatabase(Dbpath))
+                {
+                    var col = db.GetCollection<City>("cities");
+                    var result = col.FindAll().ToList();
+                    if (result.Count() == 0)
+                    {
+                        Log.Information($"Database Info : No record found  in database !");
+                        return result;
+                    }
+
+                    Log.Information($"Database Info : Execution completed for method GetAll()");
+                    return result;
+                }
             }
+            catch(Exception ex)
+            {
+                Log.Error($"Database Exception occured : {ex.Message}");
+                throw new Exception(ex.Message);
+            }
+            
         }
 
     }

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Serilog;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +11,6 @@ namespace WeatherAPI.Controllers
     /// <summary>
     /// APIs connected to Openweathermap service to get weather information from Nordea corporate office
     /// </summary>
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class WeatherController : Controller
@@ -35,16 +32,13 @@ namespace WeatherAPI.Controllers
         [Route("GetWeatherInfo/{ID}")]
         public async Task<ActionResult<WeatherInfoResponse>> GetWeatherInfo(int ID)
         {
-            Log.Information($"Excecution started for : {HttpContext.Request.Path}");
             try
             {
                 var data = await _weatherServiceHandler.GetWeatherInfoByID(ID);
-                Log.Information($"Excecution completed for : {HttpContext.Request.Path}");
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                Log.Error($"Exception occured : {ex.Message}");
                 return BadRequest(ex.Message);
             }
         }
@@ -56,16 +50,13 @@ namespace WeatherAPI.Controllers
         [Route("GetWeatherInfo")]
         public async Task<ActionResult<List<WeatherInfoResponse>>> GetWeatherInfo()
         {
-            Log.Information($"Excecution started for : {HttpContext.Request.Path}");
             try
             {
                 var data = await _weatherServiceHandler.GetAllWeatherInfo();
-                Log.Information($"Excecution completed for : {HttpContext.Request.Path}");
                 return Ok(data);
             }
             catch (Exception ex)
             {
-                Log.Error($"Exception occured : {ex.Message}");
                 return  BadRequest(ex.Message); ;
             }
         }
